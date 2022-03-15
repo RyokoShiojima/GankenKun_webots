@@ -17,10 +17,11 @@ from controller import Supervisor
 import numpy as np
 import os
 import shutil
-import pandas as np
+import pandas as pd
 import math
 import csv
 
+"""
 # start the webots supervisor
 supervisor = Supervisor()
 time_step = int(supervisor.getBasicTimeStep())
@@ -33,7 +34,7 @@ player = supervisor.getFromDef('PLAYER')
 player_translation = supervisor.getFromDef('PLAYER').getField('translation')
 player_rotation = supervisor.getFromDef('PLAYER').getField('rotation')
 player_controller = supervisor.getFromDef('PLAYER').getField('controller')
-
+"""
 
 class Robot(object):
     def __init__(self, x, y, th):
@@ -64,6 +65,18 @@ def set_csv(csvname):
         pass
 
 def main():
+
+    supervisor = Supervisor()
+    time_step = int(supervisor.getBasicTimeStep())
+
+    field = Field("kid")
+    children = supervisor.getRoot().getField('children')
+    children.importMFNodeFromString(-1, f'RobocupSoccerField {{ size "kid" }}')
+    children.importMFNodeFromString(-1, f'DEF PLAYER RoboCup_GankenKun {{translation -0.3 0 0.450 rotation 0 0 1 0 controller "capture_image" controllerArgs "x-0.30_y-0.00_th_0.00.jpg"}}')
+    player = supervisor.getFromDef('PLAYER')
+    player_translation = supervisor.getFromDef('PLAYER').getField('translation')
+    player_rotation = supervisor.getFromDef('PLAYER').getField('rotation')
+
     odom_plot= []
     logcsv = "odom.csv"
     set_csv(logcsv)
@@ -77,10 +90,20 @@ def main():
     
                 for t in range(10):
                     robot.calc_odom(0.5)
+                    player.remove()
+                    count = 0
+
                     if robot.pos[0] < -4.3 or robot.pos[0] > 4.3 or\
                             robot.pos[1] < -3 or robot.pos[1] > 3:
                         break
                     else:
+                        filename = "x"+format(x,"+.2f")+"_y"+format(y,"+.2f")+"_th"+format(th,"+.3f")+".jpg"
+                        children.importMFNodeFromString(-1, f'DEF PLAYER RoboCup_GankenKun {{translation {x} {y} 0.450 rotation 0 0 1 {th} controller "capture_image" controllerArgs "{filename}"}}')
+                        player = supervisor.getFromDef('PLAYER')
+                        while supervisor.step(time_step) != -1:
+                            count += 1
+                            if count > 10:
+                                break
                         mini_odom.append(robot.pos)
 
                 if len(mini_odom) == 10:
@@ -89,7 +112,9 @@ def main():
                 else:
                     pass
 
-
+if __name__ == "__main__":
+    main()
+"""
 try:
     for x in np.arange(-4.3, 4.3, 0.2):
         for y in np.arange(-3, 3, 0.2):
@@ -105,3 +130,4 @@ try:
                         break
 except Exception:
     error(f"Unexpected exception in main referee loop: {traceback.format_exc()}", fatal=True)
+"""

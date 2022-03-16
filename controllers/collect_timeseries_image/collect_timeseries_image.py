@@ -58,6 +58,13 @@ def write_csv(odom_list, logcsv):
     df = pd.DataFrame(data=odom_list,columns=label)
     df.to_csv(logcsv,  mode='a', header=False, index=False)
 
+def set_file(filename):
+    if os.path.exists(filename) == True:
+        shutil.rmtree(filename)
+        os.makedirs(filename)
+    else:
+        os.makedirs(filename)
+
 def set_csv(csvname):
     if os.path.exists(csvname) == True:
         os.remove(csvname)
@@ -65,10 +72,8 @@ def set_csv(csvname):
         pass
 
 def main():
-
     supervisor = Supervisor()
     time_step = int(supervisor.getBasicTimeStep())
-
     field = Field("kid")
     children = supervisor.getRoot().getField('children')
     children.importMFNodeFromString(-1, f'RobocupSoccerField {{ size "kid" }}')
@@ -79,7 +84,10 @@ def main():
 
     odom_plot= []
     logcsv = "odom.csv"
+    image_file = "image/"
     set_csv(logcsv)
+    set_file(image_file)
+
     for x in np.arange(-4.3, 4.3, 0.2):
         for y in np.arange(-3.0, 3.0, 0.2):
             for th in np.arange(-math.pi, math.pi, math.pi/18):
@@ -97,8 +105,8 @@ def main():
                             robot.pos[1] < -3 or robot.pos[1] > 3:
                         break
                     else:
-                        filename = "x"+format(x,"+.2f")+"_y"+format(y,"+.2f")+"_th"+format(th,"+.3f")+".jpg"
-                        children.importMFNodeFromString(-1, f'DEF PLAYER RoboCup_GankenKun {{translation {x} {y} 0.450 rotation 0 0 1 {th} controller "capture_image" controllerArgs "{filename}"}}')
+                        image_name = image_file + "x"+format(x,"+.2f")+"_y"+format(y,"+.2f")+"_th"+format(th,"+.3f")+".jpg"
+                        children.importMFNodeFromString(-1, f'DEF PLAYER RoboCup_GankenKun {{translation {x} {y} 0.450 rotation 0 0 1 {th} controller "capture_image" controllerArgs "{image_name}"}}')
                         player = supervisor.getFromDef('PLAYER')
                         while supervisor.step(time_step) != -1:
                             count += 1

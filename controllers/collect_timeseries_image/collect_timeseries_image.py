@@ -54,7 +54,7 @@ class Robot(object):
             self.pos[2] += math.pi*2 if self.pos[2] < 0  else -math.pi*2
 
 def write_csv(odom_list, logcsv):
-    label = ["x", "y", "theta"]
+    label = ["x", "y", "theta","image"]
     df = pd.DataFrame(data=odom_list,columns=label)
     df.to_csv(logcsv,  mode='a', header=False, index=False)
 
@@ -84,39 +84,60 @@ def main():
 
     odom_plot= []
     logcsv = "odom.csv"
-    image_file = "image/"
+    #image_file = "image/"
     set_csv(logcsv)
-    set_file(image_file)
+    #set_file(image_file)
 
     for x in np.arange(-4.3, 4.3, 0.2):
         for y in np.arange(-3.0, 3.0, 0.2):
             for th in np.arange(-math.pi, math.pi, math.pi/18):
                 mini_odom = []
+                x_y_th_image = []
                 robot = Robot(x,y,th)
                 robot.velocity = [1, -math.pi/10]
                 #odom_plot= []
     
                 for t in range(10):
                     robot.calc_odom(0.5)
-                    player.remove()
-                    count = 0
+                    #player.remove()
+                    #count = 0
 
                     if robot.pos[0] < -4.3 or robot.pos[0] > 4.3 or\
                             robot.pos[1] < -3 or robot.pos[1] > 3:
                         break
                     else:
-                        image_name = image_file + "x"+format(x,"+.2f")+"_y"+format(y,"+.2f")+"_th"+format(th,"+.3f")+".jpg"
-                        children.importMFNodeFromString(-1, f'DEF PLAYER RoboCup_GankenKun {{translation {x} {y} 0.450 rotation 0 0 1 {th} controller "capture_image" controllerArgs "{image_name}"}}')
+                        #player.remove()
+                        #image_name = "x"+format(robot.pos[0],"+.2f")+"_y"+format(robot.pos[1],"+.2f")+"_th"+format(robot.pos[2],"+.3f")+".jpg"
+                        #children.importMFNodeFromString(-1, f'DEF PLAYER RoboCup_GankenKun {{translation {robot.pos[0]} {robot.pos[1]} 0.450 rotation 0 0 1 {robot.pos[2]} controller "capture_image" controllerArgs "{image_name}"}}')
+                        #player = supervisor.getFromDef('PLAYER')
+                        #while supervisor.step(time_step) != -1:
+                        #    count += 1
+                        #    if count > 10:
+                        #        break
+                        mini_odom.append(robot.pos)
+
+                if len(mini_odom) == 10:
+                    #write_csv(mini_odom,logcsv)
+                    for x_y_th in mini_odom:
+                        count= 0
+                        player.remove()
+                        image_name = "x"+format(x_y_th[0],"+.2f")+"_y"+format(x_y_th[1],"+.2f")+"_th"+format(x_y_th[2],"+.3f")+".jpg"
+                        children.importMFNodeFromString(-1, f'DEF PLAYER RoboCup_GankenKun {{translation {x_y_th[0]} {x_y_th[1]} 0.450 rotation 0 0 1 {x_y_th[2]} controller "capture_image" controllerArgs "{image_name}"}}')
                         player = supervisor.getFromDef('PLAYER')
                         while supervisor.step(time_step) != -1:
                             count += 1
                             if count > 10:
                                 break
-                        mini_odom.append(robot.pos)
+                        new_image_name = "images/" + image_name
+                        new_image_name = list(new_image_name)
+                        name = ''.join(new_image_name) 
+                        print(name)
+                        x_y_th.extend(str(name))
+                        print(x_y_th)
+                        x_y_th_image.append(x_y_th)
+                    write_csv(x_y_th_image,logcsv)
 
-                if len(mini_odom) == 10:
-                    write_csv(mini_odom,logcsv)
-                    odom_plot.append(mini_odom)
+                    #odom_plot.append(mini_odom)
                 else:
                     pass
 

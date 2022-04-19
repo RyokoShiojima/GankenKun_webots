@@ -66,20 +66,29 @@ def main():
     logcsv = "odom.csv"
     set_csv(logcsv)
 
-    for x in np.arange(-4.3, 4.3, 0.2):
-        for y in np.arange(-3.0, 3.0, 0.2):
-            for th in np.arange(-math.pi, math.pi, math.pi/18):
+    range_x  = np.arange(-4.3, 4.3, 1.0)
+    range_y  = np.arange(-3.0, 3.0, 1.0)
+    range_th = np.arange(-math.pi, math.pi, math.pi/2)
+
+    cnt = 0
+    total = len(range_x) * len(range_y) * len(range_th)
+    for x in range_x:
+        for y in range_y:
+            for th in range_th:
                 mini_odom = []
                 x_y_th_image = []
                 robot = Robot(x,y,th)
                 robot.velocity = [1, -math.pi/10]
                 #odom_plot= []
     
+                print(f'{cnt} / {total}')
+                cnt += 1
                 for t in range(10):
                     robot.calc_odom(0.5)
 
                     if robot.pos[0] < -4.3 or robot.pos[0] > 4.3 or\
                             robot.pos[1] < -3 or robot.pos[1] > 3:
+                        print(f'out of field {robot.pos}')
                         break
                     else:
                         mini_odom.append(robot.pos)
@@ -105,5 +114,6 @@ def main():
                 else:
                     pass
 
+import cProfile
 if __name__ == "__main__":
-    main()
+    cProfile.run('main()', filename='/tmp/main.prof')

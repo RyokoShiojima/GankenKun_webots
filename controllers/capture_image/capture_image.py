@@ -14,6 +14,10 @@ timestep = int(robot.getBasicTimeStep())
 camera = robot.getDevice('camera_sensor')
 camera.enable(timestep)
 
-while robot.step(timestep) != -1:
-    camera.saveImage(deviceImagePath + '/images/' + fileName, 80)
+#while robot.step(timestep) != -1:
+#    print(f'saving {fileName}')
 
+robot.step(timestep)
+robot.step(timestep)
+print(f'saving {fileName}')
+camera.saveImage(deviceImagePath + '/images/' + fileName, 80)

@@ -68,7 +68,7 @@ def main():
 
     range_x  = np.arange(-4.3, 4.3, 1.0)
     range_y  = np.arange(-3.0, 3.0, 1.0)
-    range_th = np.arange(-math.pi, math.pi, math.pi/2)
+    range_th = np.arange(0, math.pi, math.pi/2)
 
     cnt = 0
     total = len(range_x) * len(range_y) * len(range_th)
@@ -83,7 +83,7 @@ def main():
     
                 print(f'{cnt} / {total}')
                 cnt += 1
-                for t in range(10):
+                for t in range(5):
                     robot.calc_odom(0.5)
 
                     if robot.pos[0] < -4.3 or robot.pos[0] > 4.3 or\
@@ -93,7 +93,7 @@ def main():
                     else:
                         mini_odom.append(robot.pos)
 
-                if len(mini_odom) == 10:
+                if len(mini_odom) == 5:
                     #write_csv(mini_odom,logcsv)
                     for x_y_th in mini_odom:
                         count= 0
@@ -103,7 +103,7 @@ def main():
                         player = supervisor.getFromDef('PLAYER')
                         while supervisor.step(time_step) != -1:
                             count += 1
-                            if count > 10:
+                            if count > 5:
                                 break
                         new_image_name = "images/" + image_name
                         x_y_th.append(new_image_name)
@@ -116,4 +116,5 @@ def main():
 
 import cProfile
 if __name__ == "__main__":
-    cProfile.run('main()', filename='/tmp/main.prof')
+    #cProfile.run('main()', filename='/tmp/main.prof')
+    main()

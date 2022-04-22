@@ -51,6 +51,12 @@ def set_csv(csvname):
     else:
         pass
 
+def check_file(file_path):
+    if os.path.exists(file_path):
+        shutil.rmtree(file_path)
+    else:
+        os.makedirs(file_path)
+
 def main():
     supervisor = Supervisor()
     time_step = int(supervisor.getBasicTimeStep())
@@ -65,10 +71,14 @@ def main():
     odom_plot= []
     logcsv = "odom.csv"
     set_csv(logcsv)
+    cwd = os.getcwd()
+    #print(cwd)
+    image_file_path = "../capture_image/images/"
+    #check_file(image_file_path)
 
     range_x  = np.arange(-4.3, 4.3, 1.0)
     range_y  = np.arange(-3.0, 3.0, 1.0)
-    range_th = np.arange(0, math.pi, math.pi/2)
+    range_th = np.arange(0, math.pi/2, math.pi/2)
 
     cnt = 0
     total = len(range_x) * len(range_y) * len(range_th)

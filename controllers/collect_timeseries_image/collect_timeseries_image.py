@@ -19,6 +19,7 @@ import os
 import shutil
 import pandas as pd
 import math
+import random
 import csv
 
 
@@ -54,6 +55,8 @@ def set_csv(csvname):
 def check_file(file_path):
     if os.path.exists(file_path):
         shutil.rmtree(file_path)
+        os.makedirs(file_path)
+        print(f'file make success!')
     else:
         os.makedirs(file_path)
 
@@ -71,14 +74,12 @@ def main():
     odom_plot= []
     logcsv = "odom.csv"
     set_csv(logcsv)
-    cwd = os.getcwd()
-    #print(cwd)
     image_file_path = "../capture_image/images/"
-    #check_file(image_file_path)
+    check_file(image_file_path)
 
-    range_x  = np.arange(-4.3, 4.3, 1.0)
-    range_y  = np.arange(-3.0, 3.0, 1.0)
-    range_th = np.arange(0, math.pi/2, math.pi/2)
+    range_x  = np.arange(-4.3, 4.3, 0.2)
+    range_y  = np.arange(-3.0, 3.0, 0.2)
+    range_th = np.arange(0, math.pi/2, math.pi/10)
 
     cnt = 0
     total = len(range_x) * len(range_y) * len(range_th)
@@ -88,7 +89,8 @@ def main():
                 mini_odom = []
                 x_y_th_image = []
                 robot = Robot(x,y,th)
-                robot.velocity = [1, -math.pi/10]
+                random_rad = random.uniform(0, math.pi/2)
+                robot.velocity = [1, random_rad]
                 #odom_plot= []
     
                 print(f'{cnt} / {total}')

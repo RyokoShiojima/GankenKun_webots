@@ -4,6 +4,7 @@ import os
 import sys
 from controller import Supervisor
 import numpy as np
+#import time
 
 deviceImagePath = os.getcwd()
 supervisor = Supervisor()
@@ -22,6 +23,7 @@ try:
                     supervisor.step(timestep)
                 filename = "x"+format(x,"+.2f")+"_y"+format(y,"+.2f")+"_the"+format(the,"+.3f")+".jpg"
                 camera.saveImage(deviceImagePath + '/images/' + str(filename), 80)
+                #time.sleep(0.5)
 
 except Exception:
     error(f"Unexpected exception in main referee loop: {traceback.format_exc()}", fatal=True)

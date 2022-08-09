@@ -33,7 +33,7 @@ try:
     for x in np.arange(-4.3, 4.3, 0.2):
         supervisor.simulationReset()
         for y in np.arange(-3, 3, 0.2):
-            for th in np.arange(-1.57, 1.57, 3.14/10):
+            for th in np.arange(0, 6.28, 3.14/10):
                 supervisor.getFromDef('PLAYER').getField('translation').setSFVec3f([x, y, 0.450])
                 supervisor.getFromDef('PLAYER').getField('rotation').setSFRotation([0, 0, 1, th])
                 for i in range(1):
@@ -44,6 +44,7 @@ try:
                 data_list.append([x,y,th,new_image_name])
     
     write_csv(data_list, data_csv)
+    print("finish")
 
 except Exception:
     error(f"Unexpected exception in main referee loop: {traceback.format_exc()}", fatal=True)

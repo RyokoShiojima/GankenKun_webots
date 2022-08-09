@@ -16,11 +16,20 @@ camera.enable(timestep)
 
 data_list = []
 data_csv = "model_data.csv"
+image_path = deviceImagePath + '/images/'
 
 def write_csv(odom_list, logcsv):
     label = ["x", "y", "theta","image"]
     df = pd.DataFrame(data=odom_list,columns=label)
     df.to_csv(logcsv,  mode='a', header=False, index=False)
+
+def check_file(file_path):
+    if os.path.exists(file_path):
+        shutil.rmtree(file_path)
+        os.makedirs(file_path)
+        print(f'file make success!')
+    else:
+        os.makedirs(file_path)
 
 def set_csv(csvname):
     if os.path.exists(csvname) == True:
@@ -30,18 +39,20 @@ def set_csv(csvname):
 
 try:
     set_csv(data_csv)
+    check_file(image_path)
     for x in np.arange(-4.3, 4.3, 0.2):
-        supervisor.simulationReset()
         for y in np.arange(-3, 3, 0.2):
             for th in np.arange(0, 6.28, 3.14/10):
                 supervisor.getFromDef('PLAYER').getField('translation').setSFVec3f([x, y, 0.450])
                 supervisor.getFromDef('PLAYER').getField('rotation').setSFRotation([0, 0, 1, th])
-                for i in range(1):
-                    supervisor.step(timestep)
+                supervisor.step(timestep)
                 filename = "x"+format(x,"+.2f")+"_y"+format(y,"+.2f")+"_th"+format(th,"+.3f")+".jpg"
-                camera.saveImage(deviceImagePath + '/images/' + str(filename), 80)
+                camera.saveImage(image_path + str(filename), 80)
                 new_image_name = "images/" + filename
                 data_list.append([x,y,th,new_image_name])
+        supervisor.simulationReset()
+        supervisor.step(timestep)
+
     
     write_csv(data_list, data_csv)
     print("finish")

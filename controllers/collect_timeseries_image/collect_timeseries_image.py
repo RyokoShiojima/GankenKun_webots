@@ -62,7 +62,7 @@ def main():
 
     range_x  = np.arange(-4.3, 4.3, 0.2)
     range_y  = np.arange(-3.0, 3.0, 0.2)
-    range_th = np.arange(0, math.pi, math.pi/10)
+    range_th = np.arange(0, 6.28, math.pi/18)
 
     cnt = 0
     total = len(range_x) * len(range_y) * len(range_th)
@@ -91,20 +91,20 @@ def main():
                     #write_csv(mini_odom,logcsv)
                     for x_y_th in mini_odom:
                         count += 1
-                        print(count)
+                        #print(count)
                         supervisor.getFromDef('PLAYER').getField('translation').setSFVec3f([x_y_th[0], x_y_th[1], 0.450])
                         supervisor.getFromDef('PLAYER').getField('rotation').setSFRotation([0, 0, 1, x_y_th[2]])
-                        for i in range(1):
-                            supervisor.step(timestep)
+                        #for i in range(1):
+                        supervisor.step(timestep)
                         image_name = "x"+format(x_y_th[0],"+.2f")+"_y"+format(x_y_th[1],"+.2f")+"_th"+format(x_y_th[2],"+.3f")+".jpg"
                         camera.saveImage(image_file_path + str(image_name), 80)
-                        time.sleep(0.5)
+                        #time.sleep(0.5)
                         new_image_name = "images/" + image_name
                         x_y_th.append(new_image_name)
                         x_y_th_image.append(x_y_th)
                         if count == 5:
-                            print("yeahhhhhhhhhhhhhhhhhhhhhhhhhh")
                             supervisor.simulationReset()
+                            supervisor.step(timestep)
                         else:
                             pass
                     write_csv(x_y_th_image,logcsv)

@@ -17,7 +17,7 @@ from scipy.spatial.transform import Rotation as R
 
 csvfile = "log.csv"
 if os.path.exists(csvfile):
-    os.remove(csvfile)
+  os.remove(csvfile)
 
 motorNames = [
   "head_yaw_joint",                        # ID1
@@ -68,19 +68,16 @@ if __name__ == '__main__':
   walk = walking(timestep/1000, motorNames, left_foot, right_foot, joint_angles, pc)
   
   #最初の目標値の定義
-  foot_step = walk.setGoalPos([1.0, 0.0, 0.0])
+  foot_step = walk.setGoalPos([0.2, 0.0, 0.0])
 
   #画像取得関係の数値の定義(画像番号, 何秒に一回撮るか)
   cap_num = 0
   image_time = 0
 
   #目標座標定義
-  #target_global = [random.uniform(-4.5, 4.5), random.uniform(-3.0, 3.0), math.radians(random.uniform(-180, 180))]
   target_global = [0,0,0]
 
   while robot.step(timestep) != -1:
-    joint_angles, lf, rf, xp, n = walk.getNextPos()
-    
     #今のロボットの位置と姿勢
     node = robot.getSelf()
     x, y, z = node.getPosition()
@@ -105,52 +102,37 @@ if __name__ == '__main__':
     else:
       image_time += timestep
     
-    
-#    if n == 0:
-#      if (len(foot_step) <= 5):
-        #フィールド外になったときの対処をかく
-
-    #print(target_global)
-    #ロボットと目標座標との相対
-    #target_local = coord_trans_global_to_local([x, y, th], target_global)
+    #現在地から目標座標が0.5未満のときは目標座標を決め直す
     if math.dist((target_global[0], target_global[1]), (x, y)) <= 0.5:
       target_global = [random.uniform(-4.5, 4.5), random.uniform(-3.0, 3.0), math.radians(random.uniform(-180, 180))]
       print(f"目標座標更新：{target_global}")
+
+    #ロボットと目標座標との相対
     target_local = coord_trans_global_to_local([x, y, th], target_global)
 
-    target_local[2] = math.atan2(target_local[1], target_local[0])#目標座標の値
-    if math.degrees(target_local[2]) <=-30:
-      target_local = [0.1, 0, -0.5] 
-    elif math.degrees(target_local[2]) >= 30:
-      target_local = [0.1, 0, 0.5]
+    #現在の方位から目標座標までの方位で一定の閾値を越してたら向きを合わせてから歩行
+    direction = math.atan2(target_local[1], target_local[0])
+    if direction <= math.radians(-30):
+      target_local = [0.0, 0, -0.3]
+    elif direction >= math.radians(30):
+      target_local = [0.0, 0, 0.3]
     else:
-      target_local = [1, 0, 0]
+      target_local = [0.3, 0, direction/10]
 
-    
-    #TODO 目標座標に対してロボットの場所が変
-    #目標座標に対して向きを合わせてから歩かせる
+    joint_angles, lf, rf, xp, n = walk.getNextPos()
     if n == 0:
-      if len(foot_step) <= 5:
-        print(f"目標座標：{target_global} ロボットの座標：{target_local}")
-        foot_step = walk.setGoalPos(target_local + foot_step[0][0:3])
-
+      if len(foot_step) <= 6:
+        print(f"目標Global：{target_global} 歩行目標：{target_local}")
+        target_local[0] += foot_step[0][1]
+        target_local[1] += foot_step[0][2]
+        target_local[2] += foot_step[0][3]
+        foot_step = walk.setGoalPos(target_local)
       else:
         foot_step = walk.setGoalPos()
-    #print([x, y, th])
-    #print(f'{n}, {foot_step}')
         
-      #if you want new goal, please send position
+    #if you want new goal, please send position
     for i in range(len(motorNames)):
       motor[i].setPosition(joint_angles[i])
-    #pass
-
-    #if len(foot_step) == 0:
-    #  for i in range(len(motorNames)):
-    #    motor[i].setPosition(0.0)
-    #else:
-    #  for i in range(len(motorNames)):
-    #    motor[i].setPosition(joint_angles[i])
-        
 
 
 

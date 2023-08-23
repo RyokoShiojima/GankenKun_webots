@@ -106,7 +106,7 @@ if __name__ == '__main__':
       with open(csvfile, "a", newline="") as f:
         writer = csv.writer(f)
         if cap_num == 1:
-          writer.writerow(['x', 'y', 'th_radians' 'th_deg', 'image'])
+          writer.writerow(['x', 'y', 'th_radians', 'th_deg', 'image'])
         writer.writerow([str(x), str(y), str(th), str(math.degrees(th)), os.path.basename(filename)])
       cap_num += 1
       print (f'撮った画像の座標:[{x} {y} {math.degrees(th)} ラジアン表記：{th}]')

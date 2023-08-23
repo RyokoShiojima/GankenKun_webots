@@ -4,6 +4,7 @@ import os
 import csv
 import math
 import sys
+import shutil
 from geometry import coord_trans_global_to_local
 from controller import Supervisor
 sys.path.append('./GankenKun')
@@ -18,6 +19,13 @@ from scipy.spatial.transform import Rotation as R
 csvfile = "log.csv"
 if os.path.exists(csvfile):
   os.remove(csvfile)
+
+imagefile = "images/"
+if os.path.exists(imagefile):
+  shutil.rmtree(imagefile)
+  os.makedirs(imagefile)
+else:
+  os.makedirs(imagefile)
 
 motorNames = [
   "head_yaw_joint",                        # ID1
@@ -42,6 +50,9 @@ motorNames = [
 ]
 
 if __name__ == '__main__':
+  #シミュレーションする時間
+  sim_time = 10 * 60 * 1000  #10分
+
   #取得画像の保存先設定
   deviceImagePath = os.getcwd()
   image_path = deviceImagePath + '/images/'
@@ -71,7 +82,7 @@ if __name__ == '__main__':
   foot_step = walk.setGoalPos([0.2, 0.0, 0.0])
 
   #画像取得関係の数値の定義(画像番号, 何秒に一回撮るか)
-  cap_num = 0
+  cap_num = 1
   image_time = 0
 
   #目標座標定義
@@ -89,22 +100,25 @@ if __name__ == '__main__':
     if image_time >= 5000: #10秒の場合は10000
       filename = f'{image_path}{cap_num:08}.jpg'
       camera.saveImage(filename, 92)
-      cap_num += 1
+      print(f'画像取得枚数:{cap_num}')
       image_time = 0
         #print (f'{x} {y} {math.degrees(th)} {os.path.basename(filename)}')この文章をメモに書き足していく
       with open(csvfile, "a", newline="") as f:
         writer = csv.writer(f)
         if cap_num == 1:
-          writer.writerow(['x', 'y', 'th', 'image'])
-        writer.writerow([str(x), str(y), str(math.degrees(th)), os.path.basename(filename)])
+          writer.writerow(['x', 'y', 'th_radians' 'th_deg', 'image'])
+        writer.writerow([str(x), str(y), str(th), str(math.degrees(th)), os.path.basename(filename)])
+      cap_num += 1
       print (f'撮った画像の座標:[{x} {y} {math.degrees(th)} ラジアン表記：{th}]')
 
     else:
       image_time += timestep
     
+    
     #現在地から目標座標が0.5未満のときは目標座標を決め直す
     if math.dist((target_global[0], target_global[1]), (x, y)) <= 0.5:
-      target_global = [random.uniform(-4.5, 4.5), random.uniform(-3.0, 3.0), math.radians(random.uniform(-180, 180))]
+      #target_global = [random.uniform(-4.5, 4.5), random.uniform(-3.0, 3.0), math.radians(random.uniform(-180, 180))]
+      target_global = [random.uniform(-3.8, 3.8), random.uniform(-3.0, 3.0), math.radians(random.uniform(-180, 180))]
       print(f"目標座標更新：{target_global}")
 
     #ロボットと目標座標との相対
@@ -122,7 +136,7 @@ if __name__ == '__main__':
     joint_angles, lf, rf, xp, n = walk.getNextPos()
     if n == 0:
       if len(foot_step) <= 6:
-        print(f"目標Global：{target_global} 歩行目標：{target_local}")
+        #print(f"目標Global：{target_global} 歩行目標：{target_local}")
         target_local[0] += foot_step[0][1]
         target_local[1] += foot_step[0][2]
         target_local[2] += foot_step[0][3]
@@ -134,6 +148,10 @@ if __name__ == '__main__':
     for i in range(len(motorNames)):
       motor[i].setPosition(joint_angles[i])
 
+    
+    #一定枚数に達したら終了
+    if cap_num == 5001:#コードの流れの関係上、取りたい枚数+1
+        break
 
 
 

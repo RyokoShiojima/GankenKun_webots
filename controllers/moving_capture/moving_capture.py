@@ -97,7 +97,7 @@ if __name__ == '__main__':
     th, _, _ = rot.as_euler('zyx', degrees=False) #[]に3つ格納されてるうちの一番最初がth 
 
     #画像取得
-    if image_time >= 5000: #10秒の場合は10000
+    if image_time >= 3000: #10秒の場合は10000
       filename = f'{image_path}{cap_num:08}.jpg'
       camera.saveImage(filename, 92)
       print(f'画像取得枚数:{cap_num}')
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     #現在地から目標座標が0.5未満のときは目標座標を決め直す
     if math.dist((target_global[0], target_global[1]), (x, y)) <= 0.5:
       #target_global = [random.uniform(-4.5, 4.5), random.uniform(-3.0, 3.0), math.radians(random.uniform(-180, 180))]
-      target_global = [random.uniform(-3.8, 3.8), random.uniform(-3.0, 3.0), math.radians(random.uniform(-180, 180))]
+      target_global = [random.uniform(-3.8, 3.8), random.uniform(-2.5, 2.5), math.radians(random.uniform(-180, 180))]
       print(f"目標座標更新：{target_global}")
 
     #ロボットと目標座標との相対
